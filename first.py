@@ -5,7 +5,7 @@ emails = set()
 urls = set()
 
 def findAllEmails(page):
-    res = re.findall('[^"\'>:<\- ]+@[^"\'>< ]+', page.text)
+    res = re.findall('[^"\'>:<\- ]+@[^"\'>:<\- ]+', page.text)
     for word in res:
         emails.add(word.__str__())
 
