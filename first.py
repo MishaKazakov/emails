@@ -5,26 +5,36 @@ emails = set()
 urls = set()
 
 def findAllEmails(page):
-    res = re.findall('\w+@\w+.\w+', page.text)
+    res = re.findall('[^"\'>:<\- ]+@[^"\'>< ]+', page.text)
     for word in res:
         emails.add(word.__str__())
 
-def findNewUrl(url):
+def findNewUrl(url,mainSite):
     site = requests.get(url)    
     findAllEmails(site)
-    res = re.findall('<a href="(http://www.csd.tsu.ru/[^"\'>.]*)', site.text)   
+    findNewUrl.counter
+    slash = unicode('/')
+    res = re.findall('<a href="('+ mainSite + '[^"\'>.]*)', site.text)
+    rel = re.findall('<a href="/([^ "\'>]+)', site.text)
+    for adress in rel:
+        if adress[0] == slash:
+            res.append('https://' + adress[1:])
+        else:
+            res.append(mainSite + adress)
     for adress in res:
-        if not re.search('files', adress):
-            if not urls.__contains__(adress) :
-                urls.add(adress)
-                #print(findNewUrl.counter ,adress)
-                findNewUrl.counter +=1
-                findNewUrl(adress)
+        if findNewUrl.counter < 10:
+            if not re.search('files', adress):
+                if not urls.__contains__(adress) :
+                    urls.add(adress)
+                    print(findNewUrl.counter ,adress)
+                    findNewUrl.counter +=1
+                    findNewUrl(adress, mainSite)
+       
 
-a = unicode('http://www.csd.tsu.ru/' )
+a = unicode('http://www.mosigra.ru/' )
 urls.add(a)
 findNewUrl.counter = 0
-findNewUrl(a)
+findNewUrl(a,a)
 
 for email in emails:
     print(email)
